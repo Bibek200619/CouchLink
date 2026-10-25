@@ -1,0 +1,2 @@
+package dev.couchlink.ui;
+public final class RelayConfig { private RelayConfig(){} public static final String URL="https://alnxriyvmiztnbzgykhy.supabase.co/functions/v1/couchlink-relay"; public static final String API_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsbnhyaXl2bWl6dG5iemd5a2h5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyNDI0NzcsImV4cCI6MjEwODgxODQ3N30.-UTNBqbRU3jCW95Q7DGaxkn2f_quvSfLimSjLoIr-GA"; }
