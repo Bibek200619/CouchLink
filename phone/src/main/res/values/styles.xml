@@ -1,0 +1,12 @@
+<resources>
+    <style name="AppTheme" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:fontFamily">sans</item><item name="android:colorAccent">#82A8FF</item>
+        <item name="android:windowBackground">#090E1A</item><item name="android:statusBarColor">#090E1A</item>
+        <item name="android:navigationBarColor">#090E1A</item><item name="android:windowLightStatusBar">false</item>
+    </style>
+    <style name="PairingTheme" parent="AppTheme">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+</resources>
