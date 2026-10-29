@@ -158,7 +158,11 @@ public final class RemoteService extends Service {
                 textRequests.incrementAndGet();requireAdb();String text=json(r).optString("text");if(text.isEmpty()||text.length()>2000)throw new IllegalArgumentException("Enter between 1 and 2,000 characters");
                 String foreground=shell("dumpsys activity activities | grep mResumedActivity");boolean youtube=foreground.contains("com.google.android.youtube.tv/");
                 boolean committed=false;
-                if(!youtube){enableKeyboard();for(int i=0;i<4&&!committed;i++){committed=PhoneIme.commit(text);if(!committed)Thread.sleep(200);}}
+                if(!youtube){
+                    enableKeyboard();
+                    try{for(int i=0;i<4&&!committed;i++){committed=PhoneIme.commit(text);if(!committed)Thread.sleep(200);}}
+                    finally{restoreKeyboard();}
+                }
                 if(!committed)for(String command:ShellText.commands(text))shell(command);
                 textsSent.incrementAndGet();lastTextIssue="";lastTextMode=youtube?"youtube_keys":committed?"input_method":"key_events";reply(s,200,new JSONObject().put("ok",true));return;
             }
@@ -171,7 +175,7 @@ public final class RemoteService extends Service {
     private String shell(String command)throws Exception{return adb().shell(command);}
     void authorize(){
         if(identity==null||!authorizing.compareAndSet(false,true))return;
-        new Thread(()->{try{String result=new String(new AdbClient("127.0.0.1",5555,identity.adbKey,message->state=message).execute("shell:echo couchlink-ready",4096,120000),StandardCharsets.UTF_8);adbReady=result.contains("couchlink-ready");error=adbReady?"":"TV control authorization did not complete";state=adbReady?"Remote controls ready":"Authorization needed";}catch(Exception e){adbReady=false;error="Enable USB/network debugging, then accept the CouchLink debugging prompt on the TV. "+friendly(e);}finally{authorizing.set(false);}},"couchlink-adb-auth").start();
+        new Thread(()->{try{String result=new String(new AdbClient("127.0.0.1",5555,identity.adbKey,message->state=message).execute("shell:echo couchlink-ready",4096,120000),StandardCharsets.UTF_8);adbReady=result.contains("couchlink-ready");state=adbReady?"Remote controls ready":"Authorization needed";error=adbReady?"":"TV control authorization did not complete";if(adbReady)restoreKeyboard();}catch(Exception e){adbReady=false;error="Enable USB/network debugging, then accept the CouchLink debugging prompt on the TV. "+friendly(e);}finally{authorizing.set(false);}},"couchlink-adb-auth").start();
     }
     private synchronized void enableKeyboard()throws Exception{
         String original=shell("settings get secure default_input_method");
@@ -180,7 +184,7 @@ public final class RemoteService extends Service {
             prefs.edit().putString("previousIme",original).commit();shell("ime enable "+IME);shell("ime set "+IME);
         }
     }
-    void restoreKeyboard(){
+    synchronized void restoreKeyboard(){
         try{String original=prefs.getString("previousIme","");if(original.matches("[A-Za-z0-9_.$]+/[A-Za-z0-9_.$]+")){String selected=shell("settings get secure default_input_method");if(selected.startsWith("dev.couchlink.tv/"))shell("ime set "+original);prefs.edit().remove("previousIme").apply();}}catch(Exception e){error="Select your usual keyboard in TV settings to restore it.";}
     }
     private byte[] frame()throws Exception{
