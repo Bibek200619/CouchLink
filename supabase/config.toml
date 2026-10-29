@@ -1,0 +1,4 @@
+project_id = "alnxriyvmiztnbzgykhy"
+
+[functions.couchlink-relay]
+verify_jwt = false
